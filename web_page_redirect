@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="tiktok-developers-site-verification" content="qks2IatOLrEvytxxmg85XzyRxdg7e7Hy">
+    <title>TikTok Authentication - Viralyst</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #010101;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: #121212;
+            box-shadow: 0 1px 3px rgba(255,255,255,0.1);
+        }
+        .loader {
+            border: 4px solid #2d2d2d;
+            border-top: 4px solid #fe2c55;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #fallback-message {
+            display: none;
+            margin-top: 20px;
+        }
+        #debug-info {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 12px;
+            background-color: #1d1d1d;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-wrap: break-word;
+            max-width: 100%;
+        }
+        .debug-value {
+            word-break: break-all;
+            font-family: monospace;
+            margin-bottom: 8px;
+        }
+        button {
+            background-color: #fe2c55;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            margin-right: 5px;
+        }
+        button:hover {
+            background-color: #ff3d67;
+        }
+        h2 {
+            background: linear-gradient(90deg, #25f4ee, #fe2c55);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+        .manual-copy {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #1d1d1d;
+            border-radius: 5px;
+        }
+        #code-to-copy {
+            font-family: monospace;
+            word-break: break-all;
+            color: #25f4ee;
+            margin-bottom: 10px;
+        }
+        .copy-button {
+            background-color: #1d1d1d;
+            border: 1px solid #fe2c55;
+            color: #fe2c55;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Redirecting to Viralyst App</h2>
+        <div class="loader"></div>
+        <p>You'll be automatically redirected in a moment...</p>
+        <div id="fallback-message">
+            <p>Unable to open the app automatically.</p>
+            <p>Please return to the Viralyst app manually.</p>
+            <div id="manual-copy" class="manual-copy">
+                <p>If you're using the app, you can copy this code and paste it in the app:</p>
+                <div id="code-to-copy"></div>
+                <button onclick="copyCode()" class="copy-button">Copy Code</button>
+            </div>
+            <button onclick="retryRedirect()">Try Again</button>
+            <button onclick="showManualCopy()">Copy Code</button>
+            <button onclick="toggleDebugInfo()">Show Debug Info</button>
+            <button onclick="window.close()">Close</button>
+        </div>
+        <div id="debug-info">
+            <h4>Debug Information:</h4>
+            <div class="debug-value" id="current-url"></div>
+            <div class="debug-value" id="redirect-uri"></div>
+            <div class="debug-value" id="code-value"></div>
+            <div class="debug-value" id="state-value"></div>
+            <div class="debug-value" id="error-value"></div>
+            <div class="debug-value" id="deep-link"></div>
+            <div class="debug-value" id="user-agent"></div>
+            <div class="debug-value" id="clean-code"></div>
+            <div class="debug-value" id="raw-code"></div>
+        </div>
+    </div>
+
+    <script>
+        // Debug constants
+        const EXACT_REDIRECT_URI = 'https://viralystsupport.info/';
+        const APP_PACKAGE = 'com.viralyst.online'; // Package esatto dell'app
+        
+        // Extract query parameters from URL - Ritorna il valore esatto senza decodificare
+        function getQueryParam(name) {
+            const url = window.location.href;
+            const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+            const results = regex.exec(url);
+            
+            if (!results) return null;
+            if (!results[2]) return '';
+            
+            // Non decodifichiamo il valore per mantenere l'esatta stringa come ricevuta da TikTok
+            return results[2];
+        }
+        
+        // Clean the code by removing any asterisk and what follows
+        function cleanCode(code) {
+            if (!code) return '';
+            
+            // Remove any * and what follows
+            if (code.indexOf('*') !== -1) {
+                return code.split('*')[0];
+            }
+            
+            return code;
+        }
+        
+        // Toggle debug information display
+        function toggleDebugInfo() {
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.style.display = debugInfo.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Show manual copy area
+        function showManualCopy() {
+            document.getElementById('manual-copy').style.display = 'block';
+        }
+        
+        // Copy code to clipboard
+        function copyCode() {
+            const codeElement = document.getElementById('code-to-copy');
+            const textArea = document.createElement('textarea');
+            textArea.value = codeElement.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            const copyButton = document.querySelector('.copy-button');
+            copyButton.textContent = 'Copied!';
+            setTimeout(() => {
+                copyButton.textContent = 'Copy Code';
+            }, 2000);
+        }
+        
+        // Update debug information
+        function updateDebugInfo(code, error, state, deepLink) {
+            document.getElementById('current-url').innerHTML = `<strong>Current URL:</strong> ${window.location.href}`;
+            document.getElementById('redirect-uri').innerHTML = `<strong>Exact Redirect URI:</strong> ${EXACT_REDIRECT_URI}`;
+            document.getElementById('code-value').innerHTML = `<strong>Code:</strong> ${code || 'null'}`;
+            document.getElementById('state-value').innerHTML = `<strong>State:</strong> ${state || 'null'}`;
+            document.getElementById('error-value').innerHTML = `<strong>Error:</strong> ${error || 'null'}`;
+            document.getElementById('deep-link').innerHTML = `<strong>Deep Link:</strong> ${deepLink || 'null'}`;
+            document.getElementById('user-agent').innerHTML = `<strong>User Agent:</strong> ${navigator.userAgent}`;
+            
+            if (code) {
+                // Importante: secondo la documentazione TikTok, il code deve essere URL decoded
+                // per l'exchange token, ma per il deep link dobbiamo preservarlo così com'è
+                document.getElementById('raw-code').innerHTML = `<strong>Raw Code:</strong> ${code}`;
+                
+                const cleanedCode = cleanCode(code);
+                document.getElementById('clean-code').innerHTML = `<strong>Cleaned Code:</strong> ${cleanedCode}`;
+                // Anche aggiorna il codice per la copia manuale
+                document.getElementById('code-to-copy').textContent = cleanedCode;
+            }
+        }
+
+        // Detect platform
+        function getOS() {
+            const userAgent = window.navigator.userAgent,
+                platform = window.navigator.platform,
+                macosPlatforms = ['Macintosh', 'MacIntel', 'MacPPC', 'Mac68K'],
+                windowsPlatforms = ['Win32', 'Win64', 'Windows', 'WinCE'],
+                iosPlatforms = ['iPhone', 'iPad', 'iPod'];
+
+            if (macosPlatforms.indexOf(platform) !== -1) {
+                return 'Mac OS';
+            } else if (iosPlatforms.indexOf(platform) !== -1) {
+                return 'iOS';
+            } else if (windowsPlatforms.indexOf(platform) !== -1) {
+                return 'Windows';
+            } else if (/Android/.test(userAgent)) {
+                return 'Android';
+            } else if (/Linux/.test(platform)) {
+                return 'Linux';
+            }
+
+            return 'Unknown';
+        }
+
+        // Redirect to Flutter app with appropriate parameters
+        function redirectToApp() {
+            // Ottiene i parametri senza decodificare per mantenere il formato esatto
+            const rawCode = getQueryParam('code');
+            const error = getQueryParam('error');
+            const state = getQueryParam('state');
+            const errorReason = getQueryParam('error_reason');
+            const errorDescription = getQueryParam('error_description');
+            
+            let deepLink = '';
+            const os = getOS();
+            
+            if (rawCode) {
+                // IMPORTANTE: Manteniamo il codice esattamente come lo riceviamo da TikTok
+                // ma rimuoviamo eventuali asterischi e ciò che segue
+                const processedCode = cleanCode(rawCode);
+                console.log('Raw code:', rawCode);
+                console.log('Processed code:', processedCode);
+                
+                // Nel deep link, passiamo il codice così com'è (sarà l'app a decodificarlo)
+                // Ma usiamo encodeURIComponent per evitare problemi nei parametri URL
+                deepLink = `viralyst://auth/tiktok-callback?code=${encodeURIComponent(processedCode)}`;
+                
+                // Update debug info before redirecting
+                updateDebugInfo(rawCode, error, state, deepLink);
+                
+                // Tenta di aprire l'app con il metodo appropriato per la piattaforma
+                tryOpenApp(processedCode, deepLink, os);
+            } else if (error) {
+                // Error case: redirect with error details
+                deepLink = `viralyst://auth/tiktok-callback?error=${error}`;
+                
+                if (errorReason) {
+                    deepLink += `&reason=${errorReason}`;
+                }
+                
+                if (errorDescription) {
+                    deepLink += `&description=${errorDescription}`;
+                }
+                
+                // Update debug info before redirecting
+                updateDebugInfo(null, error, state, deepLink);
+                
+                // Tenta di aprire l'app
+                window.location.href = deepLink;
+            } else {
+                // Invalid or missing parameters
+                updateDebugInfo(null, error, state, null);
+                document.getElementById('fallback-message').style.display = 'block';
+                document.querySelector('.loader').style.display = 'none';
+                document.getElementById('debug-info').style.display = 'block';
+            }
+            
+            // Show fallback message after timeout if redirect doesn't work
+            setTimeout(function() {
+                document.getElementById('fallback-message').style.display = 'block';
+                document.querySelector('.loader').style.display = 'none';
+            }, 2000);
+        }
+        
+        // Try to open the app with multiple methods
+        function tryOpenApp(code, deepLink, os) {
+            console.log(`Trying to open app on ${os} with deeplink: ${deepLink}`);
+            
+            if (os === 'Android') {
+                // Per Android, usa prima gli intent URI (per Chrome)
+                const intentUrl = `intent://${deepLink.substring(10)}#Intent;scheme=viralyst;package=${APP_PACKAGE};end`;
+                console.log('Trying Android intent URL:', intentUrl);
+                
+                // Prova a usare un iframe nascosto per l'intent (può funzionare in alcuni browser)
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = intentUrl;
+                document.body.appendChild(iframe);
+                
+                // Fallback allo schema URL standard dopo un breve ritardo
+                setTimeout(() => {
+                    console.log('Trying direct URL scheme:', deepLink);
+                    window.location.href = deepLink;
+                }, 250);
+                
+                // Secondo fallback all'intent URL diretto
+                setTimeout(() => {
+                    console.log('Trying direct intent URL via location');
+                    window.location.href = intentUrl;
+                }, 500);
+            } else if (os === 'iOS') {
+                // Per iOS, usiamo direttamente lo schema URL
+                window.location.href = deepLink;
+            } else {
+                // Per desktop o altri dispositivi, proviamo lo schema URL
+                window.location.href = deepLink;
+            }
+            
+            // Il timer del fallback mostrerà comunque il messaggio se nessuno dei metodi funziona
+        }
+        
+        // Function to retry redirect when button is clicked
+        function retryRedirect() {
+            document.getElementById('fallback-message').style.display = 'none';
+            document.getElementById('manual-copy').style.display = 'none';
+            document.querySelector('.loader').style.display = 'block';
+            redirectToApp();
+        }
+        
+        // Execute redirect with a small delay
+        window.onload = function() {
+            // First update debug info in case user needs to see it
+            const code = getQueryParam('code');
+            const error = getQueryParam('error');
+            const state = getQueryParam('state');
+            updateDebugInfo(code, error, state, null);
+            
+            // Imposta un piccolo ritardo prima di reindirizzare
+            setTimeout(redirectToApp, 500);
+        };
+    </script>
+</body>
+</html>
