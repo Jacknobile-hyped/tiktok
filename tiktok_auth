@@ -1,0 +1,311 @@
+# Processo di Autenticazione TikTok 
+
+## Codice Lato Flutter
+
+```dart
+// COSTANTI IMPORTANTI
+static const String clientKey = 'sbawaykwkqr81rd92h';
+static const String clientSecret = '6cYEjo0MhGGOYhK38eOrDJcS0OQRcMfc';
+static const String redirectUri = 'https://viralystsupport.info/';
+static const String customSchemeRedirectUri = 'viralyst://auth/tiktok-callback';
+static const String authBaseUrl = 'https://www.tiktok.com/v2/auth/authorize/';
+static const String tokenUrl = 'https://open.tiktokapis.com/v2/oauth/token/';
+static const String scopes = 'video.publish,video.upload,user.info.basic,user.info.stats,video.list';
+
+// INIZIALIZZAZIONE DEEP LINKING
+Future<void> _initDeepLinkHandling() async {
+  final appLinks = AppLinks();
+  
+  // Handle initial link
+  final initialLink = await appLinks.getInitialAppLink();
+  if (initialLink != null) {
+    _handleIncomingLink(initialLink.toString());
+  }
+
+  // Handle incoming links
+  _linkSubscription = appLinks.uriLinkStream.listen((Uri? uri) {
+    if (uri != null) {
+      _handleIncomingLink(uri.toString());
+    }
+  });
+}
+
+// AVVIO AUTENTICAZIONE (Step 1)
+Future<void> _connectTikTokAccount() async {
+  // Generiamo un timestamp e valore casuale per evitare caching
+  final timestamp = DateTime.now().millisecondsSinceEpoch;
+  final randomValue = _random.nextInt(1000000).toString();
+  final dynamicState = 'state_${timestamp}_$randomValue';
+  
+  // CRUCIALE: Usiamo redirectUri esatto come configurato su TikTok
+  final encodedRedirectUri = Uri.encodeComponent(redirectUri);
+  
+  // Creiamo l'URL di autorizzazione
+  final authUri = Uri.parse('$authBaseUrl?'
+    'client_key=$clientKey&'
+    'scope=$scopes&'
+    'response_type=code&'
+    'redirect_uri=$encodedRedirectUri&'
+    'state=$dynamicState');
+  
+  // Apriamo il browser per l'autenticazione
+  await launchUrl(
+    authUri, 
+    mode: LaunchMode.externalApplication,
+  );
+}
+
+// GESTIONE CALLBACK (Step 3)
+void _handleIncomingLink(String link) {
+  final uri = Uri.parse(link);
+  
+  // Estrai il codice di autorizzazione
+  final code = uri.queryParameters['code'];
+  if (code != null) {
+    _handleAuthCallback(code);
+  }
+}
+
+// SCAMBIO CODICE PER TOKEN (Step 4)
+Future<void> _handleAuthCallback(String code) async {
+  // Puliamo il codice da asterischi
+  String cleanCode = code;
+  if (cleanCode.contains('*')) {
+    cleanCode = cleanCode.split('*')[0];
+  }
+  
+  // Primo tentativo: usiamo Map per i parametri
+  final response = await _requestTikTokToken(cleanCode, redirectUri);
+  
+  // Se fallisce, proviamo con stringa formattata manualmente
+  if (response.statusCode == 200 && response.body.contains('invalid_request')) {
+    final response2 = await _requestTikTokTokenManual(cleanCode, redirectUri);
+    
+    // Usiamo la risposta che ha funzionato
+    final useResponse = !response2.body.contains('invalid_request') ? response2 : response;
+    
+    // Processiamo la risposta
+    return _processTokenResponse(useResponse);
+  }
+  
+  // Altrimenti usiamo la prima risposta
+  return _processTokenResponse(response);
+}
+
+// FUNZIONE DI RICHIESTA TOKEN PRIMARIA (Metodo 1)
+Future<http.Response> _requestTikTokToken(String code, String redirectUri) async {
+  // IMPORTANTE: il code deve essere URL decoded
+  final decodedCode = Uri.decodeComponent(code);
+  
+  final Map<String, String> params = {
+    'client_key': clientKey,
+    'client_secret': clientSecret,
+    'code': decodedCode,
+    'grant_type': 'authorization_code',
+    'redirect_uri': redirectUri,
+  };
+  
+  // Content-Type DEVE essere application/x-www-form-urlencoded
+  return await http.post(
+    Uri.parse(tokenUrl),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Cache-Control': 'no-cache',
+    },
+    body: params,
+  );
+}
+
+// FUNZIONE DI RICHIESTA TOKEN ALTERNATIVA (Metodo 2)
+Future<http.Response> _requestTikTokTokenManual(String code, String redirectUri) async {
+  final decodedCode = Uri.decodeComponent(code);
+  
+  // Creiamo manualmente la stringa di richiesta
+  final bodyString = 
+      'client_key=$clientKey'
+      '&client_secret=$clientSecret'
+      '&code=$decodedCode'
+      '&grant_type=authorization_code'
+      '&redirect_uri=${Uri.encodeComponent(redirectUri)}';
+  
+  return await http.post(
+    Uri.parse(tokenUrl),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Cache-Control': 'no-cache',
+    },
+    body: bodyString,
+  );
+}
+
+// ELABORAZIONE RISPOSTA TOKEN E SALVATAGGIO ACCOUNT (Step 5)
+Future<void> _processTokenResponse(http.Response response) async {
+  final data = json.decode(response.body);
+  
+  if (data.containsKey('error')) {
+    throw 'Error from TikTok: ${data['error_description']}';
+  }
+  
+  // Estraiamo i token
+  final accessToken = data['access_token'];
+  final refreshToken = data['refresh_token'];
+  final openId = data['open_id'];
+  
+  // Richiediamo info utente
+  final userInfoResponse = await http.get(
+    Uri.parse('https://open.tiktokapis.com/v2/user/info/'),
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+    },
+  );
+  
+  // Estraiamo info utente
+  final userData = json.decode(userInfoResponse.body);
+  Map<String, dynamic> userInfo = {};
+  
+  if (userData.containsKey('data') && userData['data'].containsKey('user')) {
+    userInfo = userData['data']['user'];
+  } else if (userData.containsKey('data')) {
+    userInfo = userData['data'];
+  }
+  
+  // Salviamo l'account nel database
+  await _database
+    .child('users')
+    .child(user.uid)
+    .child('social_accounts')
+    .child('tiktok')
+    .child(openId)
+    .set({
+      'username': userInfo['username'] ?? '',
+      'display_name': userInfo['display_name'] ?? '',
+      'avatar_url': userInfo['avatar_url'] ?? '',
+      'access_token': accessToken,
+      'refresh_token': refreshToken,
+      'open_id': openId,
+      // Altri dati...
+    });
+}
+```
+
+## Codice Pagina Web di Redirect (Step 2)
+
+Il file tiktok-redirect.html gestisce il callback da TikTok e reindirizza all'app:
+
+```javascript
+// Costanti principali
+const EXACT_REDIRECT_URI = 'https://viralystsupport.info/';
+const APP_PACKAGE = 'com.viralyst.online';
+
+// Estrazione parametri dall'URL
+function getQueryParam(name) {
+  const url = window.location.href;
+  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
+  const results = regex.exec(url);
+  
+  if (!results) return null;
+  if (!results[2]) return '';
+  
+  return results[2];
+}
+
+// Pulizia codice (rimuove asterischi)
+function cleanCode(code) {
+  if (!code) return '';
+  
+  if (code.indexOf('*') !== -1) {
+    return code.split('*')[0];
+  }
+  
+  return code;
+}
+
+// Funzione principale di reindirizzamento
+function redirectToApp() {
+  const rawCode = getQueryParam('code');
+  const error = getQueryParam('error');
+  const state = getQueryParam('state');
+  const scopes = getQueryParam('scopes');
+  
+  let deepLink = '';
+  const os = getOS(); // Rileva piattaforma
+  
+  if (rawCode) {
+    const processedCode = cleanCode(rawCode);
+    
+    // Crea deeplink per aprire l'app
+    deepLink = `viralyst://auth/tiktok-callback?code=${encodeURIComponent(processedCode)}`;
+    
+    // Aggiungi parametri aggiuntivi
+    if (scopes) deepLink += `&scopes=${encodeURIComponent(scopes)}`;
+    if (state) deepLink += `&state=${encodeURIComponent(state)}`;
+    
+    // URL di fallback come backup
+    const fallbackUrl = `${EXACT_REDIRECT_URI}?code=${encodeURIComponent(processedCode)}`;
+    
+    // Tenta di aprire l'app
+    tryOpenApp(processedCode, deepLink, os, fallbackUrl);
+  }
+}
+
+// Apertura app con metodi multipli
+function tryOpenApp(code, deepLink, os, fallbackUrl) {
+  if (os === 'Android') {
+    // Intent URL per Android (Chrome)
+    const intentUrl = `intent://${deepLink.substring(10)}#Intent;scheme=viralyst;package=${APP_PACKAGE};end`;
+    
+    // Metodo 1: iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = intentUrl;
+    document.body.appendChild(iframe);
+    
+    // Metodo 2: schema URL diretto
+    setTimeout(() => {
+      window.location.href = deepLink;
+    }, 250);
+    
+    // Metodo 3: intent URI diretta
+    setTimeout(() => {
+      window.location.href = intentUrl;
+    }, 500);
+    
+    // Metodo 4: URL fallback
+    setTimeout(() => {
+      if (fallbackUrl) window.location.href = fallbackUrl;
+    }, 750);
+  } else if (os === 'iOS') {
+    // Per iOS usiamo direttamente lo schema URL
+    window.location.href = deepLink;
+    
+    // Fallback
+    setTimeout(() => {
+      if (fallbackUrl) window.location.href = fallbackUrl;
+    }, 500);
+  }
+  
+  // Se niente funziona, mostra interfaccia fallback
+  setTimeout(function() {
+    document.getElementById('fallback-message').style.display = 'block';
+    document.querySelector('.loader').style.display = 'none';
+  }, 1500);
+}
+
+// Funzione di apertura app diretta (pulsante)
+function directOpenApp() {
+  if (window.savedDeepLink) {
+    window.location.href = window.savedDeepLink;
+    
+    setTimeout(() => {
+      if (window.savedFallbackUrl) window.location.href = window.savedFallbackUrl;
+    }, 300);
+  }
+}
+
+// Inizializzazione
+window.onload = function() {
+  setTimeout(redirectToApp, 300);
+};
+```
+
+
