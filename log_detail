@@ -1,0 +1,89 @@
+I/flutter (22555): Using redirect URI: https://viralystsupport.info/
+I/flutter (22555): Encoded redirect URI: https%3A%2F%2Fviralystsupport.info%2F
+I/flutter (22555): Launching TikTok auth URL: https://www.tiktok.com/v2/auth/authorize/?client_key=sbawaykwkqr81rd92h&scope=video.publish,video.upload,user.info.basic,user.info.stats,video.list&response_type=code&redirect_uri=https%3A%2F%2Fviralystsupport.info%2F&state=state_1747324715030_178579
+I/UrlLauncher(22555): component name for https://www.tiktok.com/v2/auth/authorize/?client_key=sbawaykwkqr81rd92h&scope=video.publish,video.upload,user.info.basic,user.info.stats,video.list&response_type=code&redirect_uri=https%3A%2F%2Fviralystsupport.info%2F&state=state_1747324715030_178579 is {org.mozilla.firefox/org.mozilla.fenix.IntentReceiverActivity}
+I/flutter (22555): Launching URL...
+I/Timeline(22555): Timeline: Activity_launch_request time:741902709
+I/flutter (22555): URL launched successfully
+W/Looper  (22555): Slow Looper main: Activity com.viralyst.online/com.example.viralyst.MainActivity is 491ms late (wall=7ms running=9ms ClientTransaction{ lifecycleRequest=android.app.servertransaction.StopActivityItem }) because of 1 msg, msg 1 took 480ms (seq=8040 running=373ms runnable=47ms h=android.view.Choreographer$FrameHandler c=android.view.Choreographer$FrameDisplayEventReceiver)
+D/com.llfbandit.app_links(22555): Intent { act=android.intent.action.VIEW cat=[android.intent.category.BROWSABLE] dat=https://viralystsupport.info/... flg=0x13400000 cmp=com.viralyst.online/com.example.viralyst.MainActivity (has extras) }
+D/com.llfbandit.app_links(22555): handleIntent: (Action) android.intent.action.VIEW
+D/com.llfbandit.app_links(22555): handleIntent: (Data) https://viralystsupport.info/?code=V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV%2A0%215247.e1&scopes=user.info.basic%2Cvideo.upload%2Cuser.info.stats%2Cvideo.list%2Cvideo.publish&state=state_1747324715030_178579
+I/flutter (22555): Received deep link: https://viralystsupport.info/?code=V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV%2A0%215247.e1&scopes=user.info.basic%2Cvideo.upload%2Cuser.info.stats%2Cvideo.list%2Cvideo.publish&state=state_1747324715030_178579
+I/flutter (22555): Handling incoming link: https://viralystsupport.info/?code=V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV%2A0%215247.e1&scopes=user.info.basic%2Cvideo.upload%2Cuser.info.stats%2Cvideo.list%2Cvideo.publish&state=state_1747324715030_178579
+I/flutter (22555): Parsed URI: https://viralystsupport.info/?code=V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV%2A0%215247.e1&scopes=user.info.basic%2Cvideo.upload%2Cuser.info.stats%2Cvideo.list%2Cvideo.publish&state=state_1747324715030_178579
+I/flutter (22555): URI scheme: https, host: viralystsupport.info, path: /
+I/flutter (22555): Query parameters: {code: V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV*0!5247.e1, scopes: user.info.basic,video.upload,user.info.stats,video.list,video.publish, state: state_1747324715030_178579}
+I/flutter (22555): TikTok authorization code found: V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV*0!5247.e1    
+I/flutter (22555): Handling auth callback with code: V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV*0!5247.e1   
+I/flutter (22555): Using redirect URI for token exchange: https://viralystsupport.info/
+I/flutter (22555): Cleaned code for token request: V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV
+I/flutter (22555): Trying method 1: Using Map parameters
+I/flutter (22555): Making token request with decoded code: V-noUt5y7V...
+I/flutter (22555): Sending token request with parameters:
+I/flutter (22555): client_key: sbawaykwkqr81rd92h
+I/flutter (22555): redirect_uri: https://viralystsupport.info/
+I/flutter (22555): code: V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV
+I/flutter (22555): grant_type: authorization_code
+I/flutter (22555): Params: {client_key: sbawaykwkqr81rd92h, client_secret: 6cYEjo0MhGGOYhK38eOrDJcS0OQRcMfc, code: V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV, grant_type: authorization_code, redirect_uri: https://viralystsupport.info/}
+I/flutter (22555): Token response status: 200
+I/flutter (22555): Error returned in token response body: {"error":"invalid_request","error_description":"The request parameters are malformed.","log_id":"202505151558366609AC27BD77480E7390"}
+I/flutter (22555): Error type: invalid_request
+I/flutter (22555): Error description: The request parameters are malformed.
+I/flutter (22555): Log ID: 202505151558366609AC27BD77480E7390
+I/flutter (22555):
+I/flutter (22555): --- Token Request (Method 1) Response Headers ---
+I/flutter (22555): connection: keep-alive
+I/flutter (22555): cache-control: max-age=0, no-cache, no-store
+I/flutter (22555): date: Thu, 15 May 2025 15:58:36 GMT
+I/flutter (22555): access-control-allow-origin: *
+I/flutter (22555): x-origin-response-time: 47,23.36.66.40
+I/flutter (22555): x-parent-response-time: 148,95.101.132.227,177,95.101.132.227      
+I/flutter (22555): server-timing: cdn-cache; desc=MISS, edge; dur=181, origin; dur=0,cdn-cache; desc=MISS, edge; dur=106, origin; dur=46
+I/flutter (22555): x-tt-trace-id: 00-2505151558366609AC27BD77480E7390-41134B235DA1DE2A-00
+I/flutter (22555): pragma: no-cache
+I/flutter (22555): content-type: application/json
+I/flutter (22555): x-tt-logid: 202505151558366609AC27BD77480E7390
+I/flutter (22555): x-tt-trace-host: 01d88d38621b29e3d4d82b99bac96671c80ee4181df76d4e311809ef9996661fbe4fbabac41c7332294df869f9dd1af3752cf2cf42935f4ed6c0fd417aaf5c200e22689e1dcab79be1b0abceee37bd86e225f1b6bcce43c02edcff3879c6ab083e49a30f06b2167525b0fa0dbd5da497b2d55694c0bc904382a209ac7b7d2a56c5
+I/flutter (22555): server: nginx
+I/flutter (22555): x-tt-origin-idc: useast5
+I/flutter (22555): x-tt-trace-tag: id=16;cdn-cache=miss;type=dyn
+I/flutter (22555): x-janus-info: jkm-x0P5YJy5La7DqRb8Q8mKOm1Od-1uEznGxCRoWKeWIeVmIXu90kuw9HGmIC28QoQu7XnmzLfCzkQYlY5IVyAh1yNK92ezI4OhC_0fXlk6Oe77z8rrCR1luN_9d41c_hPOie4PXHVF8yzqWEtzA9FyUuF5swC8KysOgJJhboG_qubGLzLujgwVWlazk_VuVJl5Sp5chqe9SnQqU6IstncaNt4BVnArjNVrSNTjQMiqFompCQ8Z5eYMVdL9kz9SLepq2doN-x81u24qNhu_f7MMqLpz
+I/flutter (22555): access-control-allow-credentials: true
+I/flutter (22555): access-control-allow-headers: *
+I/flutter (22555): access-control-allow-methods: *
+I/flutter (22555): content-length: 133
+I/flutter (22555): expires: Thu, 15 May 2025 15:58:36 GMT
+I/flutter (22555): --- End of Headers ---
+I/flutter (22555): Method 1 failed, trying method 2: Using manually formatted string  
+I/flutter (22555): Manual body: client_key=sbawaykwkqr81rd92h&client_secret=6cYEjo0MhGGOYhK38eOrDJcS0OQRcMfc&code=V-noUt5y7VTyWGCE1LpxNOXiPaOHv3YInaFDSpNxDohUyAgdaV0hj9jOTisOnmdZeeO16QABHbDrCvyGdi6uXD0PAm7N3Q4egD71-_ezdcTnc4jO5tbSNECvyMBmZptOrWZHoPGsWflALzTT3oTNM7tKNgY4VKR9jwv2PLLhQnnXpx2ulVCd1yH3TwPl1yAV&grant_type=authorization_code&redirect_uri=https%3A%2F%2Fviralystsupport.info%2F
+I/flutter (22555): Found Threads accounts for user WZn8hdkvlpSMisViSOsBZQpFUhJ3
+I/flutter (22555): Loaded 1 Threads accounts
+I/flutter (22555): Method 2 token response status: 200
+I/flutter (22555): Method 2 token response body: {"error":"invalid_request","error_description":"The request parameters are malformed.","log_id":"202505151558377F5E96BBC5BF3F0EA0C3"}
+I/flutter (22555):
+I/flutter (22555): --- Token Request (Method 2) Response Headers ---
+I/flutter (22555): connection: keep-alive
+I/flutter (22555): cache-control: max-age=0, no-cache, no-store
+I/flutter (22555): date: Thu, 15 May 2025 15:58:37 GMT
+I/flutter (22555): access-control-allow-origin: *
+I/flutter (22555): x-origin-response-time: 50,23.36.66.12
+I/flutter (22555): x-parent-response-time: 152,95.101.132.209,165,95.101.132.209
+I/flutter (22555): server-timing: cdn-cache; desc=MISS, edge; dur=169, origin; dur=0,cdn-cache; desc=MISS, edge; dur=105, origin; dur=50
+I/flutter (22555): x-tt-trace-id: 00-2505151558377F5E96BBC5BF3F0EA0C3-01A6C3EF384FD9B2-00
+I/flutter (22555): pragma: no-cache
+I/flutter (22555): content-type: application/json
+I/flutter (22555): x-tt-logid: 202505151558377F5E96BBC5BF3F0EA0C3
+I/flutter (22555): x-tt-trace-host: 01d88d38621b29e3d4d82b99bac96671c80ee4181df76d4e311809ef9996661fbefe50bddc8a01f8eadcb2a8310ffc7f3ca9d304195a46e3683a29304d03a0af8a001be2dd6275cea5cf6d49d6886cc63c4b4d13e815c1dfea7f9fa1e5b5d744a7264723af0c204f2f776a05cebf7f6863c5d600ea921e6869080cf94398c182f1
+I/flutter (22555): server: nginx
+I/flutter (22555): x-tt-origin-idc: useast5
+I/flutter (22555): x-tt-trace-tag: id=16;cdn-cache=miss;type=dyn
+I/flutter (22555): x-janus-info: _KDUH6w0ON8SDhzi52GhEQag4uAteFHquTrbcUTuN9IHKdJT-dsqu5L0Wd42eluSA4JFxJXy3yElRzMqPzNVkgxGtLWwsgnYAtkwpGTwxOEy9Ith9U1qNbAsHIox1ljjlfT7gSftW7648fWvMapfYzmhpgroXt6x2VcK2wwzTkCgbljqM038bW3uKt-uJdt4talEfl6mTqKUzlUvgE1VZiUEyOSvCXDYkXZFmWzQjkMPi_JNHcJJR5hWOduYN6ojOodPBEVDLXLYZHdhkhA9e99-bvyk
+I/flutter (22555): access-control-allow-headers: *
+I/flutter (22555): access-control-allow-credentials: true
+I/flutter (22555): access-control-allow-methods: *
+I/flutter (22555): content-length: 133
+I/flutter (22555): expires: Thu, 15 May 2025 15:58:37 GMT
+I/flutter (22555): --- End of Headers ---
+I/flutter (22555): Token request x-tt-logid: 202505151558366609AC27BD77480E7390       
+I/flutter (22555): Error in _handleAuthCallback: Error from TikTok: The request parameters are malformed.
