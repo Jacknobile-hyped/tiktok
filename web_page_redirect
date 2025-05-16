@@ -127,18 +127,17 @@
             <div class="debug-value" id="error-value"></div>
             <div class="debug-value" id="deep-link"></div>
             <div class="debug-value" id="user-agent"></div>
-            <div class="debug-value" id="clean-code"></div>
-            <div class="debug-value" id="raw-code"></div>
         </div>
     </div>
 
     <script>
         // Debug constants
         const EXACT_REDIRECT_URI = 'https://viralystsupport.info/';
-        const APP_PACKAGE = 'com.viralyst.online'; // Package esatto dell'app
+        const APP_PACKAGE = 'info.viralystsupport.app'; // Il package Android della tua applicazione
         
-        // Extract query parameters from URL - Ritorna il valore esatto senza decodificare
+        // Extract query parameters from URL - Mantiene il valore esatto senza decodificare
         function getQueryParam(name) {
+            // Otteniamo i parametri dalla URL mantenendo la codifica originale
             const url = window.location.href;
             const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`);
             const results = regex.exec(url);
@@ -146,20 +145,8 @@
             if (!results) return null;
             if (!results[2]) return '';
             
-            // Non decodifichiamo il valore per mantenere l'esatta stringa come ricevuta da TikTok
+            // Importante: NON decodifichiamo il valore per mantenere l'esatta stringa come ricevuta da TikTok
             return results[2];
-        }
-        
-        // Clean the code by removing any asterisk and what follows
-        function cleanCode(code) {
-            if (!code) return '';
-            
-            // Remove any * and what follows
-            if (code.indexOf('*') !== -1) {
-                return code.split('*')[0];
-            }
-            
-            return code;
         }
         
         // Toggle debug information display
@@ -200,15 +187,9 @@
             document.getElementById('deep-link').innerHTML = `<strong>Deep Link:</strong> ${deepLink || 'null'}`;
             document.getElementById('user-agent').innerHTML = `<strong>User Agent:</strong> ${navigator.userAgent}`;
             
+            // Anche aggiorna il codice per la copia manuale
             if (code) {
-                // Importante: secondo la documentazione TikTok, il code deve essere URL decoded
-                // per l'exchange token, ma per il deep link dobbiamo preservarlo così com'è
-                document.getElementById('raw-code').innerHTML = `<strong>Raw Code:</strong> ${code}`;
-                
-                const cleanedCode = cleanCode(code);
-                document.getElementById('clean-code').innerHTML = `<strong>Cleaned Code:</strong> ${cleanedCode}`;
-                // Anche aggiorna il codice per la copia manuale
-                document.getElementById('code-to-copy').textContent = cleanedCode;
+                document.getElementById('code-to-copy').textContent = code;
             }
         }
 
@@ -237,8 +218,8 @@
 
         // Redirect to Flutter app with appropriate parameters
         function redirectToApp() {
-            // Ottiene i parametri senza decodificare per mantenere il formato esatto
-            const rawCode = getQueryParam('code');
+            // IMPORTANTE: Ottiene i parametri senza decodificare per mantenere il formato esatto inviato da TikTok
+            const code = getQueryParam('code');
             const error = getQueryParam('error');
             const state = getQueryParam('state');
             const errorReason = getQueryParam('error_reason');
@@ -247,22 +228,15 @@
             let deepLink = '';
             const os = getOS();
             
-            if (rawCode) {
-                // IMPORTANTE: Manteniamo il codice esattamente come lo riceviamo da TikTok
-                // ma rimuoviamo eventuali asterischi e ciò che segue
-                const processedCode = cleanCode(rawCode);
-                console.log('Raw code:', rawCode);
-                console.log('Processed code:', processedCode);
-                
-                // Nel deep link, passiamo il codice così com'è (sarà l'app a decodificarlo)
-                // Ma usiamo encodeURIComponent per evitare problemi nei parametri URL
-                deepLink = `viralyst://auth/tiktok-callback?code=${encodeURIComponent(processedCode)}`;
+            if (code) {
+                // Success case: IMPORTANTE - passiamo il codice esattamente come ricevuto senza modifiche
+                deepLink = `viralyst://auth/tiktok-callback?code=${code}`;
                 
                 // Update debug info before redirecting
-                updateDebugInfo(rawCode, error, state, deepLink);
+                updateDebugInfo(code, error, state, deepLink);
                 
-                // Tenta di aprire l'app con il metodo appropriato per la piattaforma
-                tryOpenApp(processedCode, deepLink, os);
+                // Tenta di aprire l'app con diversi metodi a seconda della piattaforma
+                tryOpenApp(code, deepLink, os);
             } else if (error) {
                 // Error case: redirect with error details
                 deepLink = `viralyst://auth/tiktok-callback?error=${error}`;
@@ -276,13 +250,13 @@
                 }
                 
                 // Update debug info before redirecting
-                updateDebugInfo(null, error, state, deepLink);
+                updateDebugInfo(code, error, state, deepLink);
                 
                 // Tenta di aprire l'app
                 window.location.href = deepLink;
             } else {
                 // Invalid or missing parameters
-                updateDebugInfo(null, error, state, null);
+                updateDebugInfo(code, error, state, null);
                 document.getElementById('fallback-message').style.display = 'block';
                 document.querySelector('.loader').style.display = 'none';
                 document.getElementById('debug-info').style.display = 'block';
@@ -300,36 +274,23 @@
             console.log(`Trying to open app on ${os} with deeplink: ${deepLink}`);
             
             if (os === 'Android') {
-                // Per Android, usa prima gli intent URI (per Chrome)
+                // Prova con intent URL per Android (per Chrome)
                 const intentUrl = `intent://${deepLink.substring(10)}#Intent;scheme=viralyst;package=${APP_PACKAGE};end`;
-                console.log('Trying Android intent URL:', intentUrl);
+                window.location.href = intentUrl;
                 
-                // Prova a usare un iframe nascosto per l'intent (può funzionare in alcuni browser)
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = intentUrl;
-                document.body.appendChild(iframe);
-                
-                // Fallback allo schema URL standard dopo un breve ritardo
+                // Fallback to normal URL scheme
                 setTimeout(() => {
-                    console.log('Trying direct URL scheme:', deepLink);
                     window.location.href = deepLink;
-                }, 250);
-                
-                // Secondo fallback all'intent URL diretto
-                setTimeout(() => {
-                    console.log('Trying direct intent URL via location');
-                    window.location.href = intentUrl;
                 }, 500);
             } else if (os === 'iOS') {
-                // Per iOS, usiamo direttamente lo schema URL
+                // Per iOS, usiamo solo lo schema URL
                 window.location.href = deepLink;
             } else {
-                // Per desktop o altri dispositivi, proviamo lo schema URL
+                // Per altri sistemi operativi, usiamo solo lo schema URL
                 window.location.href = deepLink;
             }
             
-            // Il timer del fallback mostrerà comunque il messaggio se nessuno dei metodi funziona
+            // Il fallback del timer mostrerà comunque il messaggio se non funziona
         }
         
         // Function to retry redirect when button is clicked
@@ -349,7 +310,7 @@
             updateDebugInfo(code, error, state, null);
             
             // Imposta un piccolo ritardo prima di reindirizzare
-            setTimeout(redirectToApp, 500);
+            setTimeout(redirectToApp, 1000);
         };
     </script>
 </body>
